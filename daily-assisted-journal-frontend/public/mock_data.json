@@ -1,0 +1,56 @@
+{
+    "entries": [
+        {
+            "entry_num": "1",
+            "type": "mood",
+            "created_at": "Tue Jun 24 2025 16:58:23 GMT-0700 (Pacific Daylight Time)",
+            "data": {
+                "selectedMood": "😌"
+            }
+        },
+        {
+            "entry_num": "2",
+            "type": "prompt",
+            "created_at": "Tue Jun 24 2025 16:59:28 GMT-0700 (Pacific Daylight Time)",
+            "data": {
+                "promptText": "What’s one small win you had today?",
+                "userResponse": "One small win I had today was ur mom"
+            }
+        },
+        {
+            "entry_num": "3",
+            "type": "free",
+            "created_at": "Tue Jun 24 2025 17:01:00 GMT-0700 (Pacific Daylight Time)",
+            "data": {
+                "userResponse": "I am feeling yada this is some long text im writing."
+            }
+        }
+    ],
+    "moods": [
+        "😞","😔","😐","🙂","😄"
+    ],
+    "prompts": [
+        {
+            "text": "What's one small win you had today?"
+        },
+        {
+            "text": "Explain one thing that holds you back."
+        },
+        {
+            "text": "Where do you see yourself one year from now?"
+        },
+        {
+            "text": "Name one thing causing you stress right now and explain how you plan on dealing with it"
+        },
+        {
+            "text": "What would your ideal tomorrow look like?"
+        }
+    ]
+}
+
+// '😞', '😔', '😐', '🙂', '😄', '👎', '👍'
+// <PromptText prompt='What’s one small win you had today?'/>
+//           <PromptText prompt="Is there anything bothering you today?"/>
+//           <PromptText prompt='Learn anything new?'/>
+//           <PromptText prompt='Free write: ' rows={12}/>
+//           <PromptText prompt='What would your ideal tomorrow look like?'/>

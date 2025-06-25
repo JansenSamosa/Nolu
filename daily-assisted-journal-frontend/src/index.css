@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {  
+  --font-display: "Fredoka", "sans-serif"; 
+}
+
+@utility background-saturated {
+  @apply bg-gradient-to-br from-amber-200 to-sky-400
+}
+
+@utility background {
+  /* @apply bg-gradient-to-b from-amber-100 to-sky-300 */
+  @apply bg-white
+}
+
+@utility text-color-main {
+  @apply text-gray-700
+}
+
+@utility text-color-main-title {
+  @apply text-gray-800 
+}
