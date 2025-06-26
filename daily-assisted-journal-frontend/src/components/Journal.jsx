@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import ButtonGlass from './ButtonGlass'
 import { useNavigate } from 'react-router'
+import { fetchEntries } from '../api'
 
 const Journal = () => {
   const navigate = useNavigate()
 
-  const [days, setDays] = useState([new Date(), new Date(), new Date(), new Date(), new Date()
-    , new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date()
-    , new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date(), new Date()
-  ])
+  const [entries, setEntries] = useState([])
+
+  useEffect(() => {
+    fetchEntries().then(setEntries)
+  }, [])
+
+  useEffect(() => {
+    console.log(entries)
+  }, [entries])
 
   const [streak, setStreak] = useState(4)
+  
   return (
     <div className='background-saturated w-screen h-screen
         flex flex-col
@@ -36,16 +43,25 @@ const Journal = () => {
       </div>
       <div className='overflow-auto'>
         <ul className='overflow-y-scroll m-3 h-full '>
-          {days.map((d, index) => (
+          {entries.map((entry, index) => (
             <li key={index}>
               <ButtonGlass className='w-23/24 m-auto text-2xl mb-6 p-0 font-bold flex flex-col shadow-black/15'>
                 <p className='rounded-2xl rounded-b-none p-2 bg-slate-500/10'>
-                😃 {d.toLocaleDateString()}
+                  {new Date(entry.createdAt).toLocaleDateString()}
                 </p>
-                <div className='flex m-2'>
+                <div className='flex m-2 flex-col gap-2 font-normal'>
+                  {entry.data.promptText &&
+                    <p className='bg-glass bg-white/20'>
+                      {entry.data.promptText}
+                    </p>
+                  }
+                  {entry.data.selectedMood &&
+                    <p className=''>
+                      {entry.data.selectedMood}
+                    </p>
+                  }
                   <p className='font-normal'>
-                  
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptas, qui!
+                    {entry.data.userResponse}
                   </p>
                 </div>
 
@@ -54,7 +70,7 @@ const Journal = () => {
           ))}
         </ul>
       </div>
-      <div className='p-3 flex items-end justify-between font-bold lg:justify-start text-xl gap-2 bg-sky/10'>
+      <div className='p-3 flex items-end justify-between font-bold lg:justify-start text-xl gap-2 bg-sky-400/10'>
         <ButtonGlass className='p-1 flex-1'>
           Write
         </ButtonGlass>
