@@ -33,4 +33,7 @@ export const saveEntry = async (createdAt, newEntryData, type) => {
     createdAt,
     data: newEntryData
   }
+
+  entries = [...await fetchEntries(), newEntry]
+  console.log(entries)
 }

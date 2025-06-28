@@ -17,7 +17,7 @@ const Journal = () => {
   }, [entries])
 
   const [streak, setStreak] = useState(4)
-  
+
   return (
     <div className='background-saturated w-screen h-screen
         flex flex-col

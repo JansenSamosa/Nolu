@@ -22,5 +22,5 @@
 }
 
 @utility bg-glass {
-  @apply shadow bg-white/10 rounded-2xl
+  @apply shadow bg-white/10 rounded-2xl 
 }

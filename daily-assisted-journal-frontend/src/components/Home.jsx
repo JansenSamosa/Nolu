@@ -11,6 +11,7 @@ const Home = () => {
       text-color-main  text-2xl 
     '>
       <div className='flex-1/3'></div>
+      
       <div className='flex-1/3 flex flex-col items-center justify-end text-center'>
         <h1 className='text-5xl font-bold text-shadow-md'>
         Welcome to
