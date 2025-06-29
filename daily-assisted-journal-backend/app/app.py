@@ -6,6 +6,7 @@ from app.models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData,
 from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
 
 journal_prompts = [
     "What is one thing that went well today, and why?",
@@ -134,10 +135,39 @@ def create_app(app_config=None):
 
     @app.route("/entries", methods=['GET'])
     def get_entries():
-        start_date = request.args_get("start")
-        end_date = request.args_get("end")
+        start_date = datetime.strptime(request.args.get("start"), '%Y-%m-%d')
+        end_date = datetime.strptime(request.args.get("end"), '%Y-%m-%d')
+        
+        query = (
+            select(Entry, EntryMoodData, EntryPromptData, EntryFreeData)
+            .outerjoin(EntryMoodData, EntryMoodData.id == Entry.id)
+            .outerjoin(EntryPromptData, EntryPromptData.id == Entry.id)
+            .outerjoin(EntryFreeData, EntryFreeData.id == Entry.id)
+            .where(Entry.created_at >= start_date, Entry.created_at <= end_date)
+        )
 
-        return Response(status=501)
+        results = db.session.execute(query).all()
+
+        entries = []
+        for entry, mood_data, prompt_data, free_data in results:
+            e = {
+                'type': entry.type,
+                'createdAt': str(entry.created_at)
+            }
+            
+            if mood_data:
+                e['data'] = { 'selectedMood': mood_data.selected_mood, 'userResponse': mood_data.user_response }
+            if prompt_data:
+                e['data'] = { 'promptText': prompt_data.prompt_text, 'userResponse': prompt_data.user_response }
+            if free_data:
+                e['data'] = { 'userResponse': free_data.user_response }
+
+            entries.append(e)
+
+        return (
+            jsonify({ 'entries': entries }),
+            200
+        )
     
     @app.route("/entries", methods=['POST'])
     def add_entries():
@@ -164,14 +194,14 @@ def create_app(app_config=None):
                 if t == 'mood':
                     new_entry_data = EntryMoodData(
                         id=id,
-                        mood=entry['data']['selectedMood'],
+                        selected_mood=entry['data']['selectedMood'],
                         user_response=entry['data']['userResponse']
                     )
                     entries_mood_data.append(new_entry_data)
                 elif t == 'prompt':
                     new_entry_data = EntryPromptData(
                         id=id,
-                        prompt=entry['data']['promptText'],
+                        prompt_text=entry['data']['promptText'],
                         user_response=entry['data']['userResponse']
                     )
                     entries_prompt_data.append(new_entry_data)
