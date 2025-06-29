@@ -77,7 +77,7 @@ class EntryMoodData(db.Model):
     __tablename__ = 'entries_mood_data'
     
     id: Mapped[UUID] = mapped_column(ForeignKey('entries.id'), primary_key=True)
-    mood: Mapped[str] = mapped_column(nullable=False)
+    selected_mood: Mapped[str] = mapped_column(nullable=False)
     user_response: Mapped[str] = mapped_column(nullable=False)
 
     entry: Mapped["Entry"] = relationship("Entry", back_populates="mood_data")
@@ -86,7 +86,7 @@ class EntryPromptData(db.Model):
     __tablename__ = 'entries_prompt_data'
     
     id: Mapped[UUID] = mapped_column(ForeignKey('entries.id'), primary_key=True)
-    prompt: Mapped[str] = mapped_column(nullable=False)
+    prompt_text: Mapped[str] = mapped_column(nullable=False)
     user_response: Mapped[str] = mapped_column(nullable=False)
 
     entry: Mapped["Entry"] = relationship("Entry", back_populates="prompt_data")
