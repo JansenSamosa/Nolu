@@ -33,7 +33,8 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=func.now())
 
-    entries: Mapped[list["Entry"]] = relationship("Entry", back_populates="user")
+    # TODO: uncomment the line below when authentication is implented
+    # entries: Mapped[list["Entry"]] = relationship("Entry", back_populates="user")
 
     user_streak: Mapped["UserStreak"] = relationship("UserStreak", back_populates="user")
 
@@ -59,11 +60,14 @@ class Entry(db.Model):
     __tablename__ = 'entries'
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), nullable=False)
+
+    # TODO: uncomment the line below when authentication is implented
+    # user_id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), nullable=False) 
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=func.now())
     type: Mapped[str] = mapped_column(nullable=False)
 
-    user: Mapped["User"] = relationship("User", back_populates="entries")
+    # TODO: uncomment the line below when authentication is implented
+    # user: Mapped["User"] = relationship("User", back_populates="entries")
 
     mood_data: Mapped["EntryMoodData"] = relationship("EntryMoodData", back_populates="entry", uselist=False)
     prompt_data: Mapped["EntryPromptData"] = relationship("EntryPromptData", back_populates="entry", uselist=False)

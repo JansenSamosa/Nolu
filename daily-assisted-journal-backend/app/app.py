@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
-from app.models import db, User, UserStreak, Prompt, Mood
+from app.models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData, EntryMoodData, EntryPromptData
 from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -143,8 +143,6 @@ def create_app(app_config=None):
     def add_entries():
         data = request.get_json()
 
-        entriesAddedNum = len(data)
-
         entries = []
         entries_mood_data = []
         entries_prompt_data = []
@@ -154,10 +152,56 @@ def create_app(app_config=None):
             id = uuid4()
             
             t = entry['type']
-            # if t != 'mood' and t != 'prompt' and t != ''
-            
 
-        return Response(status=501)
+            try:
+                # TODO: add user_id field when auth is implemented
+                new_entry = Entry(
+                    id=id, 
+                    created_at=entry['createdAt'], 
+                    type=t
+                )
+
+                if t == 'mood':
+                    new_entry_data = EntryMoodData(
+                        id=id,
+                        mood=entry['data']['selectedMood'],
+                        user_response=entry['data']['userResponse']
+                    )
+                    entries_mood_data.append(new_entry_data)
+                elif t == 'prompt':
+                    new_entry_data = EntryPromptData(
+                        id=id,
+                        prompt=entry['data']['promptText'],
+                        user_response=entry['data']['userResponse']
+                    )
+                    entries_prompt_data.append(new_entry_data)
+                elif t == 'free':
+                    new_entry_data = EntryFreeData(
+                        id=id,
+                        user_response=entry['data']['userResponse']
+                    )
+                    entries_free_data.append(new_entry_data)
+                else:
+                    continue
+                
+                entries.append(new_entry)
+            except Exception as e:
+                return (jsonify({'message': 'Failed: at least one entry is malformed; ' + str(e)}), 400)
+
+        try:
+            db.session.add_all(entries)
+            db.session.add_all(entries_mood_data)
+            db.session.add_all(entries_prompt_data)
+            db.session.add_all(entries_free_data)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return (jsonify({'message': 'Failed: db transaction errored'}), 400)
+
+        return (
+            jsonify({'message': 'All entries successfully added'}), 
+            201
+        )
     
     return app
 
