@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
-from app.models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData, EntryMoodData, EntryPromptData
+from models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData, EntryMoodData, EntryPromptData
 from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
