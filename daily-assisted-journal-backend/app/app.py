@@ -1,15 +1,60 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
-from app.models import db, User
+from app.models import db, User, UserStreak, Prompt, Mood
+from uuid import uuid4
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+
+journal_prompts = [
+    "What is one thing that went well today, and why?",
+    "What challenged you today, and how did you respond?",
+    "What are three things you're grateful for right now?",
+    "Did you do something today that aligned with your values?",
+    "How did you take care of your mental or physical health today?",
+    "What moment today made you feel most alive?",
+    "What emotion did you feel most strongly today, and what triggered it?",
+    "Who did you connect with today, and how did that interaction feel?",
+    "What’s one thing you could have done differently today?",
+    "What did you learn about yourself this week?",
+    "When did you feel most proud of yourself recently?",
+    "What habits are helping you right now? Which ones are holding you back?",
+    "If today were a chapter in your life story, what would the title be?",
+    "What do you want to remember about this week?",
+    "What’s something you're avoiding, and why?",
+    "What does your ideal day look like? How close was today to that?",
+    "If you had to relive one moment from today, which would it be and why?",
+    "What are you currently working toward, and how do you feel about your progress?",
+    "How have you grown or changed in the last month?",
+    "What do you want tomorrow to feel like, and what can you do to move in that direction?"
+]
+
+moods = ["😞", "😔", "😐", "🙂", "😄"]
+
+# should be called under 'with app.app_context()' after db.create_all()
+def seed_initial_data(db):
+    # add all journal prompts to db if not already added
+    for text in journal_prompts:    
+        try:
+            db.session.add(Prompt(prompt_text=text))
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+
+    # add all moods to db if not already added
+    for text in moods:
+        try:
+            db.session.add(Mood(mood_text=text))
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
 
 def create_app(app_config=None):
     load_dotenv()
 
     app = Flask(__name__)
-    CORS(app)
-    
+
     DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///:memory:")
 
     if app_config:
@@ -21,33 +66,108 @@ def create_app(app_config=None):
 
     db.init_app(app)
 
-    @app.route("/users", methods=["GET"])
-    def get_users():
-        users = User.query.all()
-        return (
-            jsonify(
-                [
-                    {"id": user.id, "name": user.name, "email": user.email, "created_at": user.created_at}
-                    for user in users
-                ]
-            ),
-            200,
-        )
-    
+    @app.route("/users/<id>", methods=["GET"])
+    def get_user(id):
+        query = select(User).where(User.id == id)
+        user = db.session.execute(query).scalar_one_or_none()
+
+        if not user:
+            return (jsonify({'message': 'Cound not find user'}), 400)
+
+        return (jsonify(
+            {
+                "name": user.name,
+                "email": user.email,
+                "createdAt": user.created_at
+            }
+        ), 200)
+
+    @app.route("/users/<id>/streak", methods=["get"])
+    def get_user_streak(id):
+        query = select(UserStreak).where(UserStreak.id == id)
+        userStreak = db.session.execute(query).scalar_one_or_none()
+
+        if not userStreak:
+            return (jsonify({'message': 'Could not find the users streak data'}), 400)
+
+        return (jsonify(
+            {
+                'streak': userStreak.streak,
+                'highestStreak': userStreak.highest_streak,
+                'lastStreakDate': userStreak.last_streak_date
+            }
+        ), 200)
+
     @app.route("/users", methods=["POST"])
     def add_user():
         data = request.get_json()
-        new_user = User(name=data["name"], email=data["email"])
-        db.session.add(new_user)
-        db.session.commit()
-        return ( jsonify({"message": "User created"}), 201)
-    
-    
+        id = uuid4()
+        new_user = User(id=id, name=data["name"], email=data["email"])
+        new_user_streak = UserStreak(id=id)
 
+        db.session.add(new_user)
+        db.session.add(new_user_streak)
+        db.session.commit()
+        return (jsonify({"message": "User created", "id": id.__str__()}), 201)
+
+    @app.route("/moods", methods=['GET'])
+    def get_moods():
+        query = select(Mood.mood_text)
+        res = db.session.execute(query).all()
+        all_moods = [row[0] for row in res]
+
+        if not all_moods:
+            return (jsonify({"message": 'Moods could not be found'}), 400)
+
+        return (jsonify({"moods": all_moods}), 200)
+
+    @app.route("/prompts", methods=['GET'])
+    def get_prompts():
+        query = select(Prompt.prompt_text)
+        res = db.session.execute(query).all()
+        all_prompts = [row[0] for row in res]
+
+        if not all_prompts:
+            return (jsonify({"message": 'Moods could not be found'}), 400)
+
+        return (jsonify({"prompts": all_prompts}), 200)
+
+    @app.route("/entries", methods=['GET'])
+    def get_entries():
+        start_date = request.args_get("start")
+        end_date = request.args_get("end")
+
+        return Response(status=501)
+    
+    @app.route("/entries", methods=['POST'])
+    def add_entries():
+        data = request.get_json()
+
+        entriesAddedNum = len(data)
+
+        entries = []
+        entries_mood_data = []
+        entries_prompt_data = []
+        entries_free_data = []
+
+        for entry in data:
+            id = uuid4()
+            
+            t = entry['type']
+            # if t != 'mood' and t != 'prompt' and t != ''
+            
+
+        return Response(status=501)
+    
     return app
+
+
 
 if __name__ == "__main__":
     app = create_app()
+
     with app.app_context():
         db.create_all()
+        seed_initial_data(db)
+
     app.run(debug=True)

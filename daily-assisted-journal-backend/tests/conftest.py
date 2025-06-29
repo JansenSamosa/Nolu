@@ -7,7 +7,7 @@ import random
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError as SQLAlchemyOperationalError
 from sqlalchemy.pool import StaticPool
-from app.app import create_app
+from app.app import create_app, seed_initial_data, journal_prompts, moods
 from app.models import db
 
 
@@ -20,7 +20,7 @@ def pytest_addoption(parser):
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def db_url(request):
     """Fixture to retrieve the database URL."""
     return request.config.getoption("--dburl")
@@ -46,7 +46,7 @@ def pytest_sessionstart(session):
         )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def app(db_url):
     """Session-wide test 'app' fixture."""
     test_config = {
@@ -57,6 +57,8 @@ def app(db_url):
 
     with app.app_context():
         db.create_all()
+        seed_initial_data(db)
+
         yield app
 
         # Close the database session and drop all tables after the session
@@ -77,3 +79,11 @@ def user_payload():
         "name": f"JohnDoe_{suffix}",
         "email": f"john_{suffix}@doe.com",
     }
+
+@pytest.fixture
+def all_moods():
+    return moods
+
+@pytest.fixture
+def all_prompts():
+    return journal_prompts

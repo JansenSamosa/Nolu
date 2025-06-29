@@ -15,13 +15,13 @@ class Prompt(db.Model):
     __tablename__ = 'prompts'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    prompt_text: Mapped[str] = mapped_column(nullable=False)
+    prompt_text: Mapped[str] = mapped_column(nullable=False, unique=True)
 
 class Mood(db.Model):
     __tablename__ = 'moods'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    mood_text: Mapped[str] = mapped_column(nullable=False)
+    mood_text: Mapped[str] = mapped_column(nullable=False, unique=True)
 
 # --------------- ADMIN ONLY CONFIGURABLE DATA 
 
@@ -35,15 +35,30 @@ class User(db.Model):
 
     entries: Mapped[list["Entry"]] = relationship("Entry", back_populates="user")
 
+    user_streak: Mapped["UserStreak"] = relationship("UserStreak", back_populates="user")
+
     def __repr__(self):
         return f"User {self.name}"
+
+default_date = datetime(1999, 1, 1, 0, 0, 0)
+
+class UserStreak(db.Model):
+    __tablename__ = 'user_streak'
+
+    id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), primary_key=True)
+    streak : Mapped[int] = mapped_column(default=0)
+    last_streak_date : Mapped[datetime] = mapped_column(default=default_date)
+
+    highest_streak : Mapped[int] = mapped_column(default=0)
+
+    user: Mapped["User"] = relationship("User", back_populates="user_streak")
 
 # JOURNAL ENTRY DATA TABLES -------------------
 
 class Entry(db.Model):
     __tablename__ = 'entries'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=func.now())
     type: Mapped[str] = mapped_column(nullable=False)
@@ -57,7 +72,7 @@ class Entry(db.Model):
 class EntryMoodData(db.Model):
     __tablename__ = 'entries_mood_data'
     
-    id: Mapped[int] = mapped_column(ForeignKey('entries.id'), primary_key=True)
+    id: Mapped[UUID] = mapped_column(ForeignKey('entries.id'), primary_key=True)
     mood: Mapped[str] = mapped_column(nullable=False)
     user_response: Mapped[str] = mapped_column(nullable=False)
 
@@ -66,7 +81,7 @@ class EntryMoodData(db.Model):
 class EntryPromptData(db.Model):
     __tablename__ = 'entries_prompt_data'
     
-    id: Mapped[int] = mapped_column(ForeignKey('entries.id'), primary_key=True)
+    id: Mapped[UUID] = mapped_column(ForeignKey('entries.id'), primary_key=True)
     prompt: Mapped[str] = mapped_column(nullable=False)
     user_response: Mapped[str] = mapped_column(nullable=False)
 
@@ -75,7 +90,7 @@ class EntryPromptData(db.Model):
 class EntryFreeData(db.Model):
     __tablename__ = 'entries_free_data'
     
-    id: Mapped[int] = mapped_column(ForeignKey('entries.id'), primary_key=True)
+    id: Mapped[UUID] = mapped_column(ForeignKey('entries.id'), primary_key=True)
     user_response: Mapped[str] = mapped_column(nullable=False)
 
     entry: Mapped["Entry"] = relationship("Entry", back_populates="free_data")
