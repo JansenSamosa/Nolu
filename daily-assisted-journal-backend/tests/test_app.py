@@ -76,8 +76,8 @@ def test_get_prompts(test_client, all_prompts):
 
 @pytest.fixture(params=[
     ('2025-06-01', '2025-06-01'),
-    # ('2025-01-01', '2025-12-31'),
-    # ('2024-12-30', '2025-01-02'),
+    ('2025-01-01', '2025-12-31'),
+    ('2024-12-30', '2025-01-02'),
 ])
 def create_valid_entries(request):
     cur_date = parse(request.param[0])
@@ -134,15 +134,14 @@ def test_add_then_get_entries(test_client, create_valid_entries):
     # TEST GETTING ENTRIES
 
     get_response = test_client.get(f'/entries?start={start_date}&end={end_date}')
-    get_response_json = json.loads(get_response.data)
+
     assert get_response.status_code == 200
+    get_response_json = json.loads(get_response.data)
 
     
-    def sort_by_created_at(entry):
-        return entry['createdAt']
-
-    sorted_response_entries = sorted(get_response_json['entries'], key=sort_by_created_at)
-    sorted_expected_entries = sorted(entries, key=sort_by_created_at)
+    def sort_by_created_at_and_type(entry):
+        return (entry['createdAt'], entry['type'], entry['data']['userResponse'])
+    
+    sorted_response_entries = sorted(get_response_json['entries'], key=sort_by_created_at_and_type)
+    sorted_expected_entries = sorted(entries, key=sort_by_created_at_and_type)
     assert sorted_response_entries == sorted_expected_entries
-
-    assert False
