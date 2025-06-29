@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '')
+sys.path.insert(0, '/home/jansensamosa/Documents/Projects/daily-assisted-journal/daily-assisted-journal-backend')
 
 
 import pytest

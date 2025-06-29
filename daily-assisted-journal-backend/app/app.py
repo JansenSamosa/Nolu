@@ -1,8 +1,12 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/..'))
+
 import os
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
-from models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData, EntryMoodData, EntryPromptData
+from app.models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData, EntryMoodData, EntryPromptData
 from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -244,4 +248,4 @@ if __name__ == "__main__":
         db.create_all()
         seed_initial_data(db)
 
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
