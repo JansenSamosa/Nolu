@@ -59,7 +59,8 @@ def create_app(app_config=None):
     load_dotenv()
 
     app = Flask(__name__)
-
+    CORS(app)
+    
     DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///:memory:")
 
     if app_config:
