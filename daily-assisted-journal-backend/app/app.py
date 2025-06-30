@@ -11,6 +11,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
+import json
 
 journal_prompts = [
     "What is one thing that went well today, and why?",
@@ -60,7 +61,7 @@ def create_app(app_config=None):
 
     app = Flask(__name__)
     CORS(app)
-    
+
     DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///:memory:")
 
     if app_config:
@@ -140,8 +141,8 @@ def create_app(app_config=None):
 
     @app.route("/entries", methods=['GET'])
     def get_entries():
-        start_date = datetime.strptime(request.args.get("start"), '%Y-%m-%d')
-        end_date = datetime.strptime(request.args.get("end"), '%Y-%m-%d')
+        start_date = datetime.strptime(request.args.get("start"), '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = datetime.strptime(request.args.get("end"), '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
         
         query = (
             select(Entry, EntryMoodData, EntryPromptData, EntryFreeData)
@@ -187,7 +188,6 @@ def create_app(app_config=None):
             id = uuid4()
             
             t = entry['type']
-
             try:
                 # TODO: add user_id field when auth is implemented
                 new_entry = Entry(
@@ -249,4 +249,40 @@ if __name__ == "__main__":
         db.create_all()
         seed_initial_data(db)
 
+        cur_date_str = str(datetime.now())
+        sample_entries = [
+            {
+                "type": "mood",
+                "createdAt": cur_date_str,
+                "data": {
+                    "selectedMood": "😌",
+                    "userResponse": "Because yada yada yada"
+                }
+            },
+                {
+                "type": "prompt",
+                "createdAt": cur_date_str,
+                "data": {
+                    "promptText": "What’s one small win you had today?",
+                    "userResponse": "One small win I had today was ur mom"
+                }
+            },
+                {
+                "type": "free",
+                "createdAt": cur_date_str,
+                "data": {
+                    "userResponse": "I am feeling yada this is some long text im writing."
+                }
+            }
+        ]
+        print(cur_date_str)
+        with app.test_client() as client:
+            res = client.post(
+                '/entries', data=json.dumps(sample_entries), content_type='application/json'
+            )
+            print(res.get_json())
+
     app.run(debug=True, port=8000)
+
+    # add some sample entries for testing purposes with backend
+
