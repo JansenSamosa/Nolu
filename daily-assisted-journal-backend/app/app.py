@@ -1,4 +1,35 @@
 import sys
+"""
+This module defines a Flask application for a daily-assisted journal backend. It provides
+endpoints for managing users, moods, prompts, and journal entries. The application interacts
+with a database using SQLAlchemy models.
+Functions:
+----------
+seed_initial_data(db):
+    Seeds the database with initial data for journal prompts and moods.
+create_app(app_config=None):
+    Creates and configures the Flask application instance.
+Routes:
+-------
+GET /users/<id>:
+    Retrieves user information by user ID.
+GET /users/<id>/streak:
+    Retrieves streak information for a user by user ID.
+POST /users:
+    Adds a new user to the database.
+GET /moods:
+    Retrieves all available moods.
+GET /prompts:
+    Retrieves all available journal prompts.
+GET /entries:
+    Retrieves journal entries within a specified date range.
+POST /entries:
+    Adds new journal entries to the database.
+Usage:
+------
+Run the script to start the Flask application. The database is initialized, and sample data
+is seeded for testing purposes. Use the provided endpoints to interact with the application.
+"""
 import os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/..'))
 
