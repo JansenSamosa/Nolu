@@ -282,7 +282,7 @@ if __name__ == "__main__":
             )
             print(res.get_json())
 
-    app.run(debug=True, port=8000)
+    app.run(debug=True, port=5000)
 
     # add some sample entries for testing purposes with backend
 
