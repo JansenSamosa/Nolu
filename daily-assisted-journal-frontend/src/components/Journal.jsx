@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react'
 import ButtonGlass from './ButtonGlass'
 import { useNavigate } from 'react-router'
 import { fetchEntries } from '../api'
+import { useFetchEntriesWithCache } from '../api_handles/entriesHandler'
 
 const Journal = () => {
   const navigate = useNavigate()
 
-  const [entries, setEntries] = useState([])
+  const { entries, loading, error } = useFetchEntriesWithCache()
 
-  useEffect(() => {
-    fetchEntries().then(setEntries)
-  }, [])
+  // useEffect(() => {
+  //   fetchEntries().then(setEntries)
+  // }, [])
 
   useEffect(() => {
     console.log(entries)
@@ -18,7 +19,7 @@ const Journal = () => {
 
   const [streak, setStreak] = useState(4)
 
-  return (
+  return !loading && (
     <div className='background-saturated w-screen h-screen
         flex flex-col
     '>

@@ -7,6 +7,7 @@ import PromptWrite from './PromptWrite'
 import FreeWrite from './FreeWrite'
 import DailyReview from './DailyReview'
 import { saveEntry } from '../api'
+import { saveEntries } from '../api_handles/entriesHandler'
 
 const Daily = ({ date = new Date() }) => {
   const [stageIndex, setStageIndex] = useState(0)
@@ -31,14 +32,16 @@ const Daily = ({ date = new Date() }) => {
 
     if (stageIndex > 2) {
       const temp = new Date()
-      const createdAt = temp.toJSON()
+      const createdAt = temp.toLocaleDateString()
+      console.log(createdAt)
 
-      const saveEntries = async () => {
-        await saveEntry(createdAt, moodResponse, 'mood')
-        await saveEntry(createdAt, promptResponse, 'prompt')
-        await saveEntry(createdAt, freeResponse, 'free')
-      }
-      saveEntries()
+      const newEntries = [
+        { type: 'mood', createdAt , data: moodResponse },
+        { type: 'prompt', createdAt , data: promptResponse },
+        { type: 'free', createdAt , data: freeResponse }
+      ]
+
+      saveEntries(newEntries)
     }
   }, [stageIndex])
 
