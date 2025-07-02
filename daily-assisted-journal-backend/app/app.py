@@ -181,6 +181,12 @@ def create_app(app_config=None):
 
     @app.route("/entries", methods=['GET'])
     def get_entries():
+        decoded_token = decode_auth_token()
+        if not decoded_token:
+            return jsonify({"message": 'Unauthorized'}), 401
+        
+        user_id = decoded_token['uid']
+
         start_date = datetime.strptime(request.args.get("start"), '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
         end_date = datetime.strptime(request.args.get("end"), '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
         
@@ -189,7 +195,11 @@ def create_app(app_config=None):
             .outerjoin(EntryMoodData, EntryMoodData.id == Entry.id)
             .outerjoin(EntryPromptData, EntryPromptData.id == Entry.id)
             .outerjoin(EntryFreeData, EntryFreeData.id == Entry.id)
-            .where(Entry.created_at >= start_date, Entry.created_at <= end_date)
+            .where(
+                Entry.user_id == user_id, 
+                Entry.created_at >= start_date, 
+                Entry.created_at <= end_date
+            )
         )
 
         results = db.session.execute(query).all()
@@ -216,7 +226,12 @@ def create_app(app_config=None):
         )
     
     @app.route("/entries", methods=['POST'])
-    def add_entries():
+    def add_entries(): 
+        decoded_token = decode_auth_token()
+        if not decoded_token:
+            return jsonify({"message": 'Unauthorized'}), 401
+        
+        user_id = decoded_token['uid']
         data = request.get_json()
 
         entries = []
@@ -224,6 +239,7 @@ def create_app(app_config=None):
         entries_prompt_data = []
         entries_free_data = []
 
+        # create entry objects
         for entry in data:
             id = uuid4()
             
@@ -232,6 +248,7 @@ def create_app(app_config=None):
                 # TODO: add user_id field when auth is implemented
                 new_entry = Entry(
                     id=id, 
+                    user_id=user_id,
                     created_at=entry['createdAt'], 
                     type=t
                 )
