@@ -39,7 +39,23 @@ def mock_auth():
     with patch("firebase_admin.auth.verify_id_token", side_effect=mock_verify_id_token):
         yield 
 
-    
+@pytest.fixture
+def john_id_token(test_client, mock_auth):
+    # ensure that john is in the users table
+    response = test_client.get('/user', headers={f'Authorization': 'Bearer john_token'})
+    assert response.status_code == 200
+
+    return 'john_token'
+
+@pytest.fixture
+def alice_id_token(test_client, mock_auth):
+    # ensure that john is in the users table
+    response = test_client.get('/user', headers={f'Authorization': 'Bearer alice_token'})
+    assert response.status_code == 200
+
+    return 'alice_token'
+
+
 def test_get_user_authorized(test_client, mock_auth):
     for _ in range(2):
         response = test_client.get('/user', headers={f'Authorization': 'Bearer john_token'})
@@ -121,30 +137,81 @@ def create_valid_entries(request):
     return (request.param, entries)
 
 
-def test_add_then_get_entries(test_client, create_valid_entries):
+def add_entries(test_client, entries, id_token):
+    create_response = test_client.post(
+        '/entries', 
+        data=json.dumps(entries), 
+        content_type='application/json',
+        headers={'Authorization': f'Bearer {id_token}'}
+    )
+    return create_response
+
+def get_entries(test_client, start_date, end_date, id_token):
+    get_response = test_client.get(
+        f'/entries?start={start_date}&end={end_date}',
+        headers={'Authorization': f'Bearer {id_token}'}
+    )
+    return get_response
+
+def test_add_then_get_entries(test_client, create_valid_entries, john_id_token):
     # TEST CREATING AND POSTING ENTRIES
     ((start_date, end_date), entries) = create_valid_entries
 
-    create_response = test_client.post(
-        '/entries', data=json.dumps(entries), content_type='application/json'
-    )
-
+    create_response = add_entries(test_client, entries, john_id_token)
     assert create_response.status_code == 201
+
     create_response_json = json.loads(create_response.data)
     
     assert create_response_json['message'] == 'All entries successfully added'
 
     # TEST GETTING ENTRIES
 
-    get_response = test_client.get(f'/entries?start={start_date}&end={end_date}')
-
+    get_response = get_entries(test_client, start_date, end_date, john_id_token)
     assert get_response.status_code == 200
     get_response_json = json.loads(get_response.data)
 
     
+    # sort entries so that they are ordered the same
     def sort_by_created_at_and_type(entry):
         return (entry['createdAt'], entry['type'], entry['data']['userResponse'])
     
     sorted_response_entries = sorted(get_response_json['entries'], key=sort_by_created_at_and_type)
     sorted_expected_entries = sorted(entries, key=sort_by_created_at_and_type)
+
     assert sorted_response_entries == sorted_expected_entries
+
+
+def test_get_entries_two_users(test_client, create_valid_entries, john_id_token, alice_id_token):
+    ((start_date, end_date), entries) = create_valid_entries
+
+    # create two unique sets of entries
+    n = len(entries)
+    entries_john = entries[0:n//2]
+    entries_alice = entries[n//2:n-1]
+
+    # create entries for both john and alice
+    create_res_john = add_entries(test_client, entries_john, john_id_token)
+    create_res_alice = add_entries(test_client, entries_alice, alice_id_token)
+    assert create_res_john.status_code == 201
+    assert create_res_alice.status_code == 201
+
+    # get entries for john
+    get_res_john = get_entries(test_client, start_date, end_date, john_id_token)
+    get_res_john_json = json.loads(get_res_john.data)
+
+    # get entries for alice
+    get_res_alice = get_entries(test_client, start_date, end_date, alice_id_token)
+    get_res_alice_json = json.loads(get_res_alice.data)
+
+    # sort all entries across all list
+    def sort_entries(entry):
+        return (entry['createdAt'], entry['type'], entry['data']['userResponse'])
+    
+    entries_john_expected = sorted(entries_john, key=sort_entries)
+    entries_alice_expected = sorted(entries_alice, key=sort_entries)
+    entries_john_actual = sorted(get_res_john_json['entries'], key=sort_entries)
+    entries_alice_actual = sorted(get_res_alice_json['entries'], key=sort_entries)
+
+    # check entries for john and alice are as expected
+    assert entries_john_expected == entries_john_actual
+    assert entries_alice_expected == entries_alice_actual
