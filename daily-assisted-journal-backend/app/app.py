@@ -70,9 +70,11 @@ journal_prompts = [
 moods = ["😞", "😔", "😐", "🙂", "😄"]
 
 # should be called under 'with app.app_context()' after db.create_all()
+
+
 def seed_initial_data(db):
     # add all journal prompts to db if not already added
-    for text in journal_prompts:    
+    for text in journal_prompts:
         try:
             db.session.add(Prompt(prompt_text=text))
             db.session.commit()
@@ -86,6 +88,7 @@ def seed_initial_data(db):
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
+
 
 def create_app(app_config=None):
     load_dotenv()
@@ -113,7 +116,7 @@ def create_app(app_config=None):
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith('Bearer '):
             return None
-        
+
         id_token = auth_header.split("Bearer ")[1]
 
         try:
@@ -122,7 +125,7 @@ def create_app(app_config=None):
             return None
 
         return decoded_token
-    
+
     @app.route("/user", methods=["GET"])
     def get_user():
         decoded_token = decode_auth_token()
@@ -140,15 +143,14 @@ def create_app(app_config=None):
                 # create user data
                 new_user = User(id=id, email=email)
                 new_user_streak = UserStreak(id=id)
-                
+
                 db.session.add(new_user)
                 db.session.add(new_user_streak)
                 db.session.commit()
-
-                user = new_user
             except:
                 return jsonify({"message": 'Error intializing user'}, 500)
 
+            user = new_user
         return (jsonify(
             {
                 "email": email,
@@ -156,6 +158,58 @@ def create_app(app_config=None):
             }
         ), 200)
 
+    @app.route("/streak", methods=['GET'])
+    def get_streak():
+        decoded_token = decode_auth_token()
+        if not decoded_token:
+            return jsonify({"message": 'Unauthorized'}), 401
+        id = decoded_token['uid']
+
+        query = select(UserStreak).where(UserStreak.id == id)
+        user_streak = db.session.execute(query).scalar_one_or_none()
+
+        if not user_streak:
+            return jsonify({'message': 'User streak data does not exist. Please initialize the user first'}), 400
+
+        return jsonify({
+            'streak': user_streak.streak,
+            'lastStreakDate': user_streak.last_streak_date
+        }), 200
+
+    @app.route('/streak', methods=['PATCH'])
+    def patch_streak():
+        decoded_token = decode_auth_token()
+        if not decoded_token:
+            return jsonify({"message": 'Unauthorized'}), 401
+        id = decoded_token['uid']
+
+        data = request.get_json()
+        last_streak_date = datetime.fromisoformat(data['lastStreakDate'])
+        
+        # get the previous last streak day
+        query = select(UserStreak).where(UserStreak.id == id)
+        user_streak = db.session.execute(query).scalar_one_or_none()
+
+        if not user_streak:
+            return jsonify({'message': 'User streak data does not exist. Please initialize the user first'}), 400
+
+        prev_last_streak_date = user_streak.last_streak_date
+
+        # logic for 0 day difference, 1 day difference, 2 or mmore day difference
+        days_difference = (last_streak_date.date() - prev_last_streak_date.date()).days
+        if days_difference == 1:
+            user_streak.streak += 1
+        elif days_difference >= 2:
+            user_streak.streak = 1
+
+        user_streak.last_streak_date = last_streak_date
+        db.session.add(user_streak)
+        db.session.commit()
+
+        return jsonify({
+            'streak': user_streak.streak,
+            'lastStreakDate': user_streak.last_streak_date
+        }), 200
 
     @app.route("/moods", methods=['GET'])
     def get_moods():
@@ -184,20 +238,22 @@ def create_app(app_config=None):
         decoded_token = decode_auth_token()
         if not decoded_token:
             return jsonify({"message": 'Unauthorized'}), 401
-        
+
         user_id = decoded_token['uid']
 
-        start_date = datetime.strptime(request.args.get("start"), '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
-        end_date = datetime.strptime(request.args.get("end"), '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
-        
+        start_date = datetime.strptime(request.args.get(
+            "start"), '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = datetime.strptime(request.args.get(
+            "end"), '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+
         query = (
             select(Entry, EntryMoodData, EntryPromptData, EntryFreeData)
             .outerjoin(EntryMoodData, EntryMoodData.id == Entry.id)
             .outerjoin(EntryPromptData, EntryPromptData.id == Entry.id)
             .outerjoin(EntryFreeData, EntryFreeData.id == Entry.id)
             .where(
-                Entry.user_id == user_id, 
-                Entry.created_at >= start_date, 
+                Entry.user_id == user_id,
+                Entry.created_at >= start_date,
                 Entry.created_at <= end_date
             )
         )
@@ -210,27 +266,29 @@ def create_app(app_config=None):
                 'type': entry.type,
                 'createdAt': str(entry.created_at)
             }
-            
+
             if mood_data:
-                e['data'] = { 'selectedMood': mood_data.selected_mood, 'userResponse': mood_data.user_response }
+                e['data'] = {'selectedMood': mood_data.selected_mood,
+                             'userResponse': mood_data.user_response}
             if prompt_data:
-                e['data'] = { 'promptText': prompt_data.prompt_text, 'userResponse': prompt_data.user_response }
+                e['data'] = {'promptText': prompt_data.prompt_text,
+                             'userResponse': prompt_data.user_response}
             if free_data:
-                e['data'] = { 'userResponse': free_data.user_response }
+                e['data'] = {'userResponse': free_data.user_response}
 
             entries.append(e)
 
         return (
-            jsonify({ 'entries': entries }),
+            jsonify({'entries': entries}),
             200
         )
-    
+
     @app.route("/entries", methods=['POST'])
-    def add_entries(): 
+    def add_entries():
         decoded_token = decode_auth_token()
         if not decoded_token:
             return jsonify({"message": 'Unauthorized'}), 401
-        
+
         user_id = decoded_token['uid']
         data = request.get_json()
 
@@ -242,14 +300,14 @@ def create_app(app_config=None):
         # create entry objects
         for entry in data:
             id = uuid4()
-            
+
             t = entry['type']
             try:
                 # TODO: add user_id field when auth is implemented
                 new_entry = Entry(
-                    id=id, 
+                    id=id,
                     user_id=user_id,
-                    created_at=entry['createdAt'], 
+                    created_at=entry['createdAt'],
                     type=t
                 )
 
@@ -275,7 +333,7 @@ def create_app(app_config=None):
                     entries_free_data.append(new_entry_data)
                 else:
                     continue
-                
+
                 entries.append(new_entry)
             except Exception as e:
                 return (jsonify({'message': 'Failed: at least one entry is malformed; ' + str(e)}), 400)
@@ -291,12 +349,11 @@ def create_app(app_config=None):
             return (jsonify({'message': 'Failed: db transaction errored'}), 400)
 
         return (
-            jsonify({'message': 'All entries successfully added'}), 
+            jsonify({'message': 'All entries successfully added'}),
             201
         )
-    
-    return app
 
+    return app
 
 
 if __name__ == "__main__":
@@ -307,40 +364,6 @@ if __name__ == "__main__":
         db.create_all()
         seed_initial_data(db)
 
-        cur_date_str = str(datetime.now())
-        sample_entries = [
-            {
-                "type": "mood",
-                "createdAt": cur_date_str,
-                "data": {
-                    "selectedMood": "😌",
-                    "userResponse": "Because yada yada yada"
-                }
-            },
-                {
-                "type": "prompt",
-                "createdAt": cur_date_str,
-                "data": {
-                    "promptText": "What’s one small win you had today?",
-                    "userResponse": "One small win I had today was ur mom"
-                }
-            },
-                {
-                "type": "free",
-                "createdAt": cur_date_str,
-                "data": {
-                    "userResponse": "I am feeling yada this is some long text im writing."
-                }
-            }
-        ]
-        print(cur_date_str)
-        with app.test_client() as client:
-            res = client.post(
-                '/entries', data=json.dumps(sample_entries), content_type='application/json'
-            )
-            print(res.get_json())
-
     app.run(debug=True, port=5000)
 
     # add some sample entries for testing purposes with backend
-

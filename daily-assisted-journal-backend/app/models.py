@@ -49,7 +49,7 @@ class UserStreak(db.Model):
     streak : Mapped[int] = mapped_column(default=0)
     last_streak_date : Mapped[datetime] = mapped_column(default=default_date)
 
-    highest_streak : Mapped[int] = mapped_column(default=0)
+    # highest_streak : Mapped[int] = mapped_column(default=0)
 
     user: Mapped["User"] = relationship("User", back_populates="user_streak")
 

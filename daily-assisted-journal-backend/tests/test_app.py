@@ -250,9 +250,9 @@ def test_update_streak(test_client, john_id_token, days):
             content_type='application/json',
             headers={'Authorization': f'Bearer {john_id_token}'}
         )
-        assert patch_response.status_code == 201
+        assert patch_response.status_code == 200
         patch_response_data = json.loads(patch_response.data)
-        assert patch_response_data['new_streak'] == i+1
+        assert patch_response_data['streak'] == i+1
 
 
     get_streak_res = test_client.get(
@@ -278,9 +278,9 @@ def test_miss_daily(test_client, john_id_token):
             content_type='application/json',
             headers={'Authorization': f'Bearer {john_id_token}'}
         )
-        assert patch_response.status_code == 201
+        assert patch_response.status_code == 200
         patch_response_data = json.loads(patch_response.data)
-        assert patch_response_data['new_streak'] == i+1
+        assert patch_response_data['streak'] == i+1
 
     
     get_streak_res = test_client.get('/streak', headers={'Authorization': f'Bearer {john_id_token}'})  
@@ -297,6 +297,6 @@ def test_miss_daily(test_client, john_id_token):
         content_type='application/json',
         headers={'Authorization': f'Bearer {john_id_token}'}
     )
-    assert patch_response.status_code == 201
+    assert patch_response.status_code == 200
     patch_response_data = json.loads(patch_response.data)
-    assert patch_response_data['new_streak'] == 1
+    assert patch_response_data['streak'] == 1
