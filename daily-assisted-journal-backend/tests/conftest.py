@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/home/jansensamosa/Documents/Projects/daily-assisted-journal/daily-assisted-journal-backend')
+# sys.path.insert(0, '/home/jansensamosa/Documents/Projects/daily-assisted-journal/daily-assisted-journal-backend')
 
 
 import pytest
@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError as SQLAlchemyOperationalError
 from sqlalchemy.pool import StaticPool
 from app.app import create_app, seed_initial_data, journal_prompts, moods
-from app.models import db
+from app.app import db
 
 
 def pytest_addoption(parser):

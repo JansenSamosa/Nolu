@@ -2,6 +2,7 @@ import pytest
 import json
 from datetime import datetime, timedelta
 from dateutil.parser import parse
+from unittest.mock import patch
 
 # HELPER FUNCTIONS
 
@@ -20,37 +21,39 @@ def validate_datetime(response_json, fieldName):
 
 # TEST CASES
 
+@pytest.fixture
+def mock_auth():
+    def mock_verify_id_token(id_token):
+        if id_token == 'john_token':
+            return {
+                "uid": "john's uid",
+                "email": "john@gmail.com"
+            }
+        elif id_token == 'alice_token':
+            return {
+                "uid": "alice's uid",
+                "email": "alice@gmail.com"
+            }
+        else:
+            raise ValueError("Invalid token")
+    with patch("firebase_admin.auth.verify_id_token", side_effect=mock_verify_id_token):
+        yield 
 
-def test_add_user(test_client, user_payload):
-    response = test_client.post(
-        "/users", data=json.dumps(user_payload), content_type="application/json"
-    )
-    assert response.status_code == 201
-    create_response_json = json.loads(response.data)
-    assert "id" in create_response_json
+    
+def test_get_user_authorized(test_client, mock_auth):
+    for _ in range(2):
+        response = test_client.get('/user', headers={f'Authorization': 'Bearer john_token'})
+        assert response.status_code == 200
 
-    id = create_response_json['id']
+        response_json = json.loads(response.data)
+        assert response_json['email'] == 'john@gmail.com'
+        validate_datetime(response_json, 'createdAt')
 
-    response = test_client.get(f'/users/{id}')
-
-    response_json = json.loads(response.data)
-    assert response.status_code == 200
-    # print(response_json)
-
-    assert response_json["email"] == user_payload["email"]
-    assert response_json["name"] == user_payload["name"]
-    validate_datetime(response_json, 'createdAt')
-
-    response_streak = test_client.get(f'/users/{id}/streak')
-    assert response_streak.status_code == 200
-
-    response_streak_json = json.loads(response_streak.data)
-    # print(response_streak_json)
-
-    assert response_streak_json["streak"] == 0
-    assert response_streak_json["highestStreak"] == 0
-    validate_datetime(response_streak_json, 'lastStreakDate')
-
+def test_get_user_unauthorized(test_client, mock_auth):
+    response = test_client.get('/user', headers={
+        'Authorization': 'Bearer invalid_token'
+    })
+    assert response.status_code == 401
 
 def test_get_moods(test_client, all_moods):
     response = test_client.get('/moods')

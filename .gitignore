@@ -1,5 +1,7 @@
 daily-assisted-journal-backend/venv
 daily-assisted-journal-backend/.pytest_cache/
+daily-assisted-journal-backend/__pycache__/
 daily-assisted-journal-backend/app/__pycache__/
 daily-assisted-journal-backend/tests/__pycache__/
-
+daily-assisted-journal-backend/firebaseServerKey.json
+.vscode/

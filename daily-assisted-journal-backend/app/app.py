@@ -31,18 +31,18 @@ Run the script to start the Flask application. The database is initialized, and 
 is seeded for testing purposes. Use the provided endpoints to interact with the application.
 """
 import os
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/..'))
-
-import os
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
-from app.models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData, EntryMoodData, EntryPromptData
+from models import db, User, UserStreak, Prompt, Mood, Entry, EntryFreeData, EntryMoodData, EntryPromptData
 from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 import json
+
+import firebase_admin
+from firebase_admin import auth
 
 journal_prompts = [
     "What is one thing that went well today, and why?",
@@ -104,49 +104,58 @@ def create_app(app_config=None):
 
     db.init_app(app)
 
-    @app.route("/users/<id>", methods=["GET"])
-    def get_user(id):
+    try:
+        app_firebase = firebase_admin.initialize_app()
+    except ValueError:
+        app_firebase = firebase_admin.get_app()
+
+    def decode_auth_token():
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return None
+        
+        id_token = auth_header.split("Bearer ")[1]
+
+        try:
+            decoded_token = auth.verify_id_token(id_token)
+        except Exception as e:
+            return None
+
+        return decoded_token
+    
+    @app.route("/user", methods=["GET"])
+    def get_user():
+        decoded_token = decode_auth_token()
+        if not decoded_token:
+            return jsonify({"message": 'Unauthorized'}), 401
+
+        id = decoded_token['uid']
+        email = decoded_token['email']
+
         query = select(User).where(User.id == id)
         user = db.session.execute(query).scalar_one_or_none()
 
         if not user:
-            return (jsonify({'message': 'Cound not find user'}), 400)
+            try:
+                # create user data
+                new_user = User(id=id, email=email)
+                new_user_streak = UserStreak(id=id)
+                
+                db.session.add(new_user)
+                db.session.add(new_user_streak)
+                db.session.commit()
+
+                user = new_user
+            except:
+                return jsonify({"message": 'Error intializing user'}, 500)
 
         return (jsonify(
             {
-                "name": user.name,
-                "email": user.email,
+                "email": email,
                 "createdAt": user.created_at
             }
         ), 200)
 
-    @app.route("/users/<id>/streak", methods=["get"])
-    def get_user_streak(id):
-        query = select(UserStreak).where(UserStreak.id == id)
-        userStreak = db.session.execute(query).scalar_one_or_none()
-
-        if not userStreak:
-            return (jsonify({'message': 'Could not find the users streak data'}), 400)
-
-        return (jsonify(
-            {
-                'streak': userStreak.streak,
-                'highestStreak': userStreak.highest_streak,
-                'lastStreakDate': userStreak.last_streak_date
-            }
-        ), 200)
-
-    @app.route("/users", methods=["POST"])
-    def add_user():
-        data = request.get_json()
-        id = uuid4()
-        new_user = User(id=id, name=data["name"], email=data["email"])
-        new_user_streak = UserStreak(id=id)
-
-        db.session.add(new_user)
-        db.session.add(new_user_streak)
-        db.session.commit()
-        return (jsonify({"message": "User created", "id": id.__str__()}), 201)
 
     @app.route("/moods", methods=['GET'])
     def get_moods():
@@ -277,6 +286,7 @@ if __name__ == "__main__":
     app = create_app()
 
     with app.app_context():
+        db.drop_all()  # Drop all tables for TESTING
         db.create_all()
         seed_initial_data(db)
 

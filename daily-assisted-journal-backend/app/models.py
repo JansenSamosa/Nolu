@@ -28,8 +28,8 @@ class Mood(db.Model):
 class User(db.Model):
     __tablename__ = 'users'
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str] = mapped_column(nullable=False)
+    id: Mapped[str] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=True)
     email: Mapped[str] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=func.now())
 
