@@ -300,3 +300,17 @@ def test_miss_daily(test_client, john_id_token):
     assert patch_response.status_code == 200
     patch_response_data = json.loads(patch_response.data)
     assert patch_response_data['streak'] == 1
+
+def test_get_dashboard(test_client, john_id_token, all_moods, all_prompts):
+    response = test_client.get(
+        '/dashboard',
+        headers={'Authorization': f'Bearer {john_id_token}'}
+    )
+    assert response.status_code == 200
+
+    response_json = json.loads(response.data)
+    assert response_json['email'] == 'john@gmail.com'
+    assert response_json['streak'] == 0
+    validate_datetime(response_json, 'lastStreakDate')
+    assert response_json['prompts'] == all_prompts
+    assert response_json['moods'] == all_moods
