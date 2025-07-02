@@ -176,6 +176,7 @@ def create_app(app_config=None):
             'lastStreakDate': user_streak.last_streak_date
         }), 200
 
+
     @app.route('/streak', methods=['PATCH'])
     def patch_streak():
         decoded_token = decode_auth_token()
@@ -353,6 +354,48 @@ def create_app(app_config=None):
             201
         )
 
+    @app.route("/dashboard", methods=['GET'])
+    def get_dashboard():
+        decoded_token = decode_auth_token()
+        if not decoded_token:
+            return jsonify({"message": 'Unauthorized'}), 401
+
+        user_id = decoded_token['uid']
+        # Get user info from database, or create if doesn't exist
+        user_query = select(User).where(User.id == user_id)
+        user = db.session.execute(user_query).scalar_one_or_none()
+        
+        if not user:
+            # Create new user if doesn't exist
+            email = decoded_token['email']
+            user = User(id=user_id, email=email)
+            user_streak = UserStreak(id=user_id)
+            db.session.add(user)
+            db.session.add(user_streak)
+            db.session.commit()
+        
+        email = user.email
+
+        # Get user streak info
+        streak_query = select(UserStreak).where(UserStreak.id == user_id)
+        user_streak = db.session.execute(streak_query).scalar_one_or_none()
+
+        # Get all prompts
+        prompts_query = select(Prompt.prompt_text)
+        prompts = [row[0] for row in db.session.execute(prompts_query).all()]
+
+        # Get all moods
+        moods_query = select(Mood.mood_text)
+        moods = [row[0] for row in db.session.execute(moods_query).all()]
+
+        return jsonify({
+            'email': email,
+            'streak': user_streak.streak if user_streak else 0,
+            'lastStreakDate': user_streak.last_streak_date if user_streak else None,
+            'prompts': prompts,
+            'moods': moods
+        }), 200
+    
     return app
 
 
