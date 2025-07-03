@@ -1,15 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react'
 import PromptCarousel from './PromptCarousel'
 import ButtonGlass from './ButtonGlass'
-import { MoodContext } from '../App'
-import MoodWrite from './MoodRight'
+import MoodWrite from './MoodWrite'
 import PromptWrite from './PromptWrite'
 import FreeWrite from './FreeWrite'
 import DailyReview from './DailyReview'
-import { saveEntry } from '../api'
-import { saveEntries } from '../api_handles/entriesHandler'
+import { useSaveEntries } from '../api_handles/entriesHandler'
+import { staticDataContext } from '../App'
+import { ArrowLeftCircleIcon, ArrowLeftIcon, ArrowRightCircleIcon, ArrowRightEndOnRectangleIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ArrowRightIcon } from '@heroicons/react/24/outline'
 
 const Daily = ({ date = new Date() }) => {
+  const { saveEntries } = useSaveEntries()
+  const { prompts, moods } = useContext(staticDataContext)
+
   const [stageIndex, setStageIndex] = useState(0)
 
   const [moodResponse, setMoodResponse] = useState({
@@ -25,6 +29,20 @@ const Daily = ({ date = new Date() }) => {
   const [freeResponse, setFreeResponse] = useState({
     userResponse: ''
   })
+  
+  const randomizePrompt = () => {
+    const randIndex = Math.floor(Math.random() * prompts.length)
+    const selectedPrompt = prompts[randIndex]
+    console.log(selectedPrompt)
+    setPromptResponse(prev => ({
+      ...prev,
+      promptText: selectedPrompt
+    }))
+  }
+
+  useEffect(() => {
+    randomizePrompt()
+  }, [])
 
   useEffect(() => {
     const clamped = Math.max(stageIndex, 0)
@@ -36,14 +54,18 @@ const Daily = ({ date = new Date() }) => {
       console.log(createdAt)
 
       const newEntries = [
-        { type: 'mood', createdAt , data: moodResponse },
-        { type: 'prompt', createdAt , data: promptResponse },
-        { type: 'free', createdAt , data: freeResponse }
+        { type: 'mood', createdAt, data: moodResponse },
+        { type: 'prompt', createdAt, data: promptResponse },
+        { type: 'free', createdAt, data: freeResponse }
       ]
 
       saveEntries(newEntries)
     }
   }, [stageIndex])
+
+  const goToNextEntry = () => {
+    setStageIndex(stageIndex + 1)
+  }
 
   return (
     <div className='
@@ -55,7 +77,9 @@ const Daily = ({ date = new Date() }) => {
     '>
       <div className='
          p-3
-         shadow-lg bg-white/10 flex items-end justify-between'
+         shadow-lg bg-white/10 flex items-center justify-between
+         h-15
+         '
       >
         <h1 className='text-4xl font-bold text-color-main-title text-shadow-md'> Nolu </h1>
       </div>
@@ -63,30 +87,13 @@ const Daily = ({ date = new Date() }) => {
         {/* prompt container */}
         <div className='flex-1'>
           <PromptCarousel index={stageIndex}>
-            <MoodWrite response={moodResponse} setResponse={setMoodResponse} />
-            <PromptWrite response={promptResponse} setResponse={setPromptResponse} />
-            <FreeWrite response={freeResponse} setResponse={setFreeResponse} />
+            <MoodWrite response={moodResponse} setResponse={setMoodResponse} goToNextEntry={goToNextEntry}/>
+            <PromptWrite response={promptResponse} setResponse={setPromptResponse} goToNextEntry={goToNextEntry}/>
+            <FreeWrite response={freeResponse} setResponse={setFreeResponse} goToNextEntry={goToNextEntry}/>
           </PromptCarousel>
         </div>
-
-        {/* buttons */}
-        <div className='w-full p-3 flex  gap-5 px-5'>
-          <ButtonGlass
-            onClick={() => setStageIndex(stageIndex - 1)}
-            className={`flex-1 text-xl font-bold p-3`}
-            clickable={stageIndex == 0 ? false : true}
-          >
-            Back
-          </ButtonGlass>
-          <ButtonGlass
-            onClick={() => setStageIndex(stageIndex + 1)}
-            className='flex-1 text-xl font-bold p-3'
-          >
-            {stageIndex < 2 ? `Next (${stageIndex + 1}/3)` : `Finish (${stageIndex + 1}/3)`}
-          </ButtonGlass>
-        </div>
       </> :
-        <DailyReview moodData={moodResponse} promptData={promptResponse} freeData={freeResponse}/>
+        <DailyReview moodData={moodResponse} promptData={promptResponse} freeData={freeResponse} />
       }
     </div>
   )

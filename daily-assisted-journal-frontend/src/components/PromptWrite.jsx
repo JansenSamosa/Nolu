@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 const PromptWrite = ({ className, response, setResponse }) => {
-
   const [userResponse, setUserResponse] = useState(response.userResponse)
-  const [promptText, setPromptText] = useState("What is a regret you still hold to this day, and why?")
+  const [promptText, setPromptText] = useState(response.promptText)
 
   useEffect(() => {
     setResponse({
