@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { staticDataContext } from '../App'
-import ButtonGlass from './ButtonGlass'
-import { ArrowLongRightIcon, ArrowRightCircleIcon, ArrowRightIcon, ChatBubbleBottomCenterIcon, ChatBubbleBottomCenterTextIcon, PencilIcon } from '@heroicons/react/24/outline'
-import { word_count } from '../utils/utils'
+import { staticDataContext } from '../../App'
+import ButtonGlass from '../ui/ButtonGlass'
+import { ArrowLongRightIcon, PencilIcon } from '@heroicons/react/24/outline'
+import { word_count } from '../../utils/utils'
 import { DocumentTextIcon } from '@heroicons/react/24/solid'
 
 const MoodWrite = ({ className, response, setResponse, goToNextEntry }) => {

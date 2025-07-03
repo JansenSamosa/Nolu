@@ -1,14 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
-import PromptCarousel from './PromptCarousel'
-import ButtonGlass from './ButtonGlass'
-import MoodWrite from './MoodWrite'
-import PromptWrite from './PromptWrite'
-import FreeWrite from './FreeWrite'
-import DailyReview from './DailyReview'
-import { useSaveEntries } from '../api_handles/entriesHandler'
-import { staticDataContext } from '../App'
-import { ArrowLeftCircleIcon, ArrowLeftIcon, ArrowRightCircleIcon, ArrowRightEndOnRectangleIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
-import { ArrowRightIcon } from '@heroicons/react/24/outline'
+import { staticDataContext } from '../../App'
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import ButtonGlass from '../ui/ButtonGlass'
+import PromptCarousel from '../ui/PromptCarousel'
+import MoodWrite from '../writing/MoodWrite'
+import PromptWrite from '../writing/PromptWrite'
+import FreeWrite from '../writing/FreeWrite'
+import DailyReview from '../writing/DailyReview'
+import { useSaveEntries } from '../../api_handles/entriesHandler'
 
 const Daily = ({ date = new Date() }) => {
   const { saveEntries } = useSaveEntries()

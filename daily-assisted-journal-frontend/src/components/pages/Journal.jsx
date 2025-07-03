@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import ButtonGlass from './ButtonGlass'
 import { useNavigate } from 'react-router'
-import { fetchEntries } from '../api'
-import { useFetchEntriesWithCache } from '../api_handles/entriesHandler'
+import { fetchEntries } from '../../api'
+import { useFetchEntriesWithCache } from '../../api_handles/entriesHandler'
+import ButtonGlass from '../ui/ButtonGlass'
 
 const Journal = () => {
   const navigate = useNavigate()

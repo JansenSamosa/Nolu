@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import ButtonGlass from './ButtonGlass'
-import { auth, createUserWithEmailAndPassword } from '../firebase.js'
+import ButtonGlass from '../ui/ButtonGlass'
+import { auth, createUserWithEmailAndPassword } from '../../firebase.js'
 import { useNavigate } from 'react-router'
 
 const Register = () => {

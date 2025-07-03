@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import ButtonGlass from './ButtonGlass'
+import ButtonGlass from '../ui/ButtonGlass'
 import {
   auth, signInWithEmailAndPassword,
   GoogleAuthProvider, providerGoogle, signInWithRedirect, getRedirectResult,
   signInWithPopup
-} from '../firebase.js'
+} from '../../firebase.js'
 
 import { useNavigate } from 'react-router'
 

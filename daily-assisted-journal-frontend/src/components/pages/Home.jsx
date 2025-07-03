@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from 'react'
-import ButtonGlass from './ButtonGlass'
+import ButtonGlass from '../ui/ButtonGlass'
 import { redirect, useNavigate } from 'react-router'
-import { AuthContext } from '../App'
-import { signOut } from 'firebase/auth'
-import { auth } from '../firebase'
+import { AuthContext } from '../../App'
+import { signOut } from '../../firebase'
+import { auth } from '../../firebase'
 
 const Home = () => {
   const navigate = useNavigate()
