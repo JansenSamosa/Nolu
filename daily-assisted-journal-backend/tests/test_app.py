@@ -314,3 +314,4 @@ def test_get_dashboard(test_client, john_id_token, all_moods, all_prompts):
     validate_datetime(response_json, 'lastStreakDate')
     assert response_json['prompts'] == all_prompts
     assert response_json['moods'] == all_moods
+    
