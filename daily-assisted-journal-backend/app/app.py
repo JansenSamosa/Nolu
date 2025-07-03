@@ -1,34 +1,39 @@
 import sys
 """
-This module defines a Flask application for a daily-assisted journal backend. It provides
-endpoints for managing users, moods, prompts, and journal entries. The application interacts
-with a database using SQLAlchemy models.
+A Flask application for managing a daily assisted journal.
+This application provides REST API endpoints for managing journal entries, user streaks,
+moods, and prompts. It uses Firebase for authentication and SQLAlchemy for database operations.
+Environment Variables:
+    DATABASE_URI: Database connection string (defaults to in-memory SQLite)
+Constants:
+    journal_prompts (list): List of predefined journal prompt questions
+    moods (list): List of mood emojis representing different emotional states
 Functions:
-----------
-seed_initial_data(db):
-    Seeds the database with initial data for journal prompts and moods.
-create_app(app_config=None):
-    Creates and configures the Flask application instance.
-Routes:
--------
-GET /users/<id>:
-    Retrieves user information by user ID.
-GET /users/<id>/streak:
-    Retrieves streak information for a user by user ID.
-POST /users:
-    Adds a new user to the database.
-GET /moods:
-    Retrieves all available moods.
-GET /prompts:
-    Retrieves all available journal prompts.
-GET /entries:
-    Retrieves journal entries within a specified date range.
-POST /entries:
-    Adds new journal entries to the database.
-Usage:
-------
-Run the script to start the Flask application. The database is initialized, and sample data
-is seeded for testing purposes. Use the provided endpoints to interact with the application.
+    seed_initial_data(db): Seeds the database with initial prompts and moods
+    create_app(app_config): Creates and configures the Flask application
+    decode_auth_token(): Decodes and verifies Firebase auth token from request headers
+Endpoints:
+    /user [GET]: Get or create user profile
+    /streak [GET, PATCH]: Get or update user's journaling streak
+    /moods [GET]: Get list of available moods
+    /prompts [GET]: Get list of available journal prompts  
+    /entries [GET, POST]: Get or create journal entries
+    /dashboard [GET]: Get user's dashboard data including streak, prompts and moods
+Models:
+    User: Stores user account information
+    UserStreak: Tracks user's journaling streak
+    Prompt: Stores journal prompts
+    Mood: Stores available moods
+    Entry: Base model for journal entries
+    EntryFreeData: Stores free-form journal entries
+    EntryMoodData: Stores mood-based entries
+    EntryPromptData: Stores prompt-based entries
+Dependencies:
+    flask
+    flask-cors
+    python-dotenv
+    sqlalchemy
+    firebase-admin
 """
 import os
 from flask import Flask, jsonify, request, Response
