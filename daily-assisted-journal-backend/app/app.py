@@ -72,8 +72,24 @@ journal_prompts = [
     "What do you want tomorrow to feel like, and what can you do to move in that direction?"
 ]
 
-moods = ["😞", "😔", "😐", "🙂", "😄"]
-
+moods = [
+    "happy",
+    "calm",
+    "excited",
+    "content",
+    "relaxed",
+    "joyful",       # positive
+    "optimistic",   # positive
+    "grateful",     # positive
+    "bored",
+    "sad",
+    "tired",
+    "angry",
+    "nervous",
+    "anxious",
+    "depressed",    # negative
+    "frustrated",   # negative
+]
 # should be called under 'with app.app_context()' after db.create_all()
 
 
@@ -181,7 +197,6 @@ def create_app(app_config=None):
             'lastStreakDate': user_streak.last_streak_date
         }), 200
 
-
     @app.route('/streak', methods=['PATCH'])
     def patch_streak():
         decoded_token = decode_auth_token()
@@ -191,7 +206,7 @@ def create_app(app_config=None):
 
         data = request.get_json()
         last_streak_date = datetime.fromisoformat(data['lastStreakDate'])
-        
+
         # get the previous last streak day
         query = select(UserStreak).where(UserStreak.id == id)
         user_streak = db.session.execute(query).scalar_one_or_none()
@@ -202,7 +217,8 @@ def create_app(app_config=None):
         prev_last_streak_date = user_streak.last_streak_date
 
         # logic for 0 day difference, 1 day difference, 2 or mmore day difference
-        days_difference = (last_streak_date.date() - prev_last_streak_date.date()).days
+        days_difference = (last_streak_date.date() -
+                           prev_last_streak_date.date()).days
         if days_difference == 1:
             user_streak.streak += 1
         elif days_difference >= 2:
@@ -369,7 +385,7 @@ def create_app(app_config=None):
         # Get user info from database, or create if doesn't exist
         user_query = select(User).where(User.id == user_id)
         user = db.session.execute(user_query).scalar_one_or_none()
-        
+
         if not user:
             # Create new user if doesn't exist
             email = decoded_token['email']
@@ -378,7 +394,7 @@ def create_app(app_config=None):
             db.session.add(user)
             db.session.add(user_streak)
             db.session.commit()
-        
+
         email = user.email
 
         # Get user streak info
@@ -400,7 +416,7 @@ def create_app(app_config=None):
             'prompts': prompts,
             'moods': moods
         }), 200
-    
+
     return app
 
 
