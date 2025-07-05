@@ -16,9 +16,12 @@
 @utility background-saturated {
   @apply bg-gradient-to-br from-amber-200 to-sky-400
 }
+@utility background-saturated-reverse {
+  @apply bg-gradient-to-br from-amber-200 to-sky-400
+}
 
 @utility background {
-  @apply bg-gradient-to-br from-amber-200 to-sky-300
+  @apply bg-gradient-to-br from-amber-100 to-sky-300
   /* @apply bg-white */
 }
 

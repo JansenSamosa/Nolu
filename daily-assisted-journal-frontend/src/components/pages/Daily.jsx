@@ -11,7 +11,6 @@ import { useSaveEntries } from '../../api_handles/entriesHandler'
 
 const Daily = ({ date = new Date() }) => {
   const { saveEntries } = useSaveEntries()
-  const { prompts, moods } = useContext(staticDataContext)
 
   const [stageIndex, setStageIndex] = useState(0)
 
@@ -28,20 +27,6 @@ const Daily = ({ date = new Date() }) => {
   const [freeResponse, setFreeResponse] = useState({
     userResponse: ''
   })
-  
-  const randomizePrompt = () => {
-    const randIndex = Math.floor(Math.random() * prompts.length)
-    const selectedPrompt = prompts[randIndex]
-    console.log(selectedPrompt)
-    setPromptResponse(prev => ({
-      ...prev,
-      promptText: selectedPrompt
-    }))
-  }
-
-  useEffect(() => {
-    randomizePrompt()
-  }, [])
 
   useEffect(() => {
     const clamped = Math.max(stageIndex, 0)
@@ -69,7 +54,6 @@ const Daily = ({ date = new Date() }) => {
   return (
     <div className='
       text-center 
-      overflow-hidden  
       background-saturated
       flex flex-col
       h-screen w-screen

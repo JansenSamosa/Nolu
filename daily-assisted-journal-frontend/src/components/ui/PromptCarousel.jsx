@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion'
 import React from 'react'
 
 const PromptCarousel = ({ children, index = 0, className }) => {
