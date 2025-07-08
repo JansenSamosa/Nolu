@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react'
 import ButtonGlass from '../ui/ButtonGlass'
+import Textarea from './Textarea'
 import { word_count } from '../../utils/utils'
-import { staticDataContext } from '../../App'
+import { StaticDataContext } from '../../App'
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeftIcon, ArrowUturnLeftIcon } from '@heroicons/react/16/solid'
 import WriteFooter from './WriteFooter'
 
 const PromptWrite = ({ className, response, setResponse, goToNextEntry }) => {
-  const { prompts, moods } = useContext(staticDataContext)
+  const { prompts, moods } = useContext(StaticDataContext)
   const [promptChoices, setPromptChoices] = useState([])
-  const [responseWordCount, setResponseWordCount] = useState(0)
+  const [responseWordCount, setResponseWordCount] = useState(word_count(response.userResponse))
 
   const setPromptText = (text) => {
     setResponse({ ...response, promptText: text })
@@ -88,16 +89,14 @@ const PromptWrite = ({ className, response, setResponse, goToNextEntry }) => {
           className='flex-1 w-full h-full pt-0 flex flex-col'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5, type: 'tween', ease: 'backInOut' }}
+          transition={{ duration: .5, delay: .5, type: 'tween', ease: 'backInOut' }}
         >
-          <textarea
-            className=' w-full h-full px-5 focus:outline-none resize-none '
+          <Textarea
             value={response.userResponse}
             onChange={e => setUserResponse(e.target.value)}
-            placeholder='Write here...'
           />
           <WriteFooter
-            showWordCount={response.promptText}
+            showWordCount={!!response.promptText}
             wordCount={responseWordCount}
             requiredWordCount={20}
             showContinueButton={responseWordCount >= 20}

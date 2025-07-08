@@ -65,7 +65,6 @@ export const useSaveEntries = () => {
           'Authorization': `Bearer ${await user.getIdToken()}`
         }
       })
-      console.log(response)
     } catch (err) {
       console.log(err)
     }
