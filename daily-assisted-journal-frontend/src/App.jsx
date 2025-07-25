@@ -9,6 +9,8 @@ import { fetchMoods } from './api'
 import { auth, onAuthStateChanged } from './firebase.js'
 import axios from 'axios'
 import Test from './components/pages/Test.jsx'
+import { useSaveEntries } from './api_handles/entriesHandler.jsx'
+import { saveSampleEntries } from './utils/generateSampleData.js'
 
 export const AuthContext = createContext()
 export const StaticDataContext = createContext()
@@ -59,7 +61,7 @@ const App = () => {
       lastStreakDate: response.data.lastStreakDate
     })
   }
-
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, user => {
       if (user) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import ButtonGlass from '../ui/ButtonGlass'
+import ButtonGlass from '../ui/ButtonGlass.jsx'
 import { auth, createUserWithEmailAndPassword } from '../../firebase.js'
 import { useNavigate } from 'react-router'
 

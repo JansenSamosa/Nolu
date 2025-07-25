@@ -7,6 +7,7 @@ import DailyReview from '../writing/DailyReview'
 import { useSaveEntries } from '../../api_handles/entriesHandler'
 import { useUpdateStreak } from '../../api_handles/streakHandler'
 import { getLocalISOString, word_count } from '../../utils/utils'
+import Header from '../ui/Header'
 
 
 /**
@@ -104,18 +105,6 @@ const Daily = () => {
     handleFreeEntry
   } = useNewJournalEntries()
 
-  // TODO: DELETE THIS (its for debugging purposes)
-  useEffect(() => {
-    if (stageIndex > 2) {
-      const newEntries = [
-        { type: 'mood', createdAt: moodEntry.createdAt, data: moodEntry.data },
-        { type: 'prompt', createdAt: promptEntry.createdAt, data: promptEntry.data },
-        { type: 'free', createdAt: freeEntry.createdAt, data: freeEntry.data }
-      ]
-      saveEntries(newEntries)
-      patchStreak(started.current)
-    }
-  }, [])
 
   const goToNextEntry = () => {
     const nextStage = Math.max(stageIndex + 1, 0)
@@ -158,14 +147,7 @@ const Daily = () => {
       flex flex-col
       h-screen w-screen
     '>
-      <div className='
-         p-3
-         shadow-lg bg-white/10 flex items-center justify-between 
-         h-15
-         '
-      >
-        <h1 className='text-4xl font-bold text-color-main-title text-shadow-md'> Nolu </h1>
-      </div>
+      <Header />
       {stageIndex != 3 ? <>
         {/* prompt container */}
         <div className='flex-1'>

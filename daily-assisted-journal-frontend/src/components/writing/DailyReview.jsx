@@ -4,87 +4,8 @@ import ButtonGlass from '../ui/ButtonGlass'
 import { useNavigate } from 'react-router'
 import { StreakContext } from '../../App'
 import { motion } from 'framer-motion'
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
 import { BookOpenIcon } from '@heroicons/react/24/outline'
-
-const EntryItem = ({ entry, index }) => {
-  const buttonRef = useRef(null)
-  const [viewResponse, setViewResponse] = useState(false)
-
-  let headerText = ""
-  const response = entry.data.userResponse
-
-  if (entry.type === 'mood') {
-    headerText = `You felt ${entry.data.selectedMood}`
-  } else if (entry.type === 'prompt') {
-    headerText = entry.data.promptText
-  } else {
-    headerText = 'Free Write: use this space to capture any remaining thoughts or ideas you have.'
-  }
-
-  const handleClick = () => {
-    setViewResponse(!viewResponse)
-    
-    // Scroll to this button after a brief delay (to let layout animation start)
-    setTimeout(() => {
-      buttonRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center', // 'start', 'center', 'end', or 'nearest'
-        inline: 'nearest'
-      })
-    }, 100) // Small delay to let the layout animation begin
-  }
-
-  return (
-    <motion.li
-      className='w-full'
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: 'backInOut' }}
-    >
-      <MotionConfig
-        transition={{ duration: 0.5, ease: 'backInOut' }}
-      >
-        <motion.button
-          ref={buttonRef}
-          className='w-full bg-glass px-5 cursor-pointer pt-5 flex flex-col gap-2'
-          onClick={handleClick}
-          layout
-        >
-          <motion.p
-            layout
-            className="font-bold"
-          >
-            {headerText}
-
-          </motion.p>
-          {viewResponse &&
-            <motion.p
-              layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, ease: 'backInOut' }}
-            >
-              {response}
-            </motion.p>
-          }
-
-          <motion.div
-            layout
-            className='size-7 m-auto'
-          >
-            {viewResponse ?
-              <ChevronUpIcon />
-              :
-              <ChevronDownIcon />
-            }
-          </motion.div>
-        </motion.button>
-      </MotionConfig>
-    </motion.li>
-  )
-}
+import EntryItem from './EntryItem'
 
 const DailyReview = ({ entries }) => {
   const navigate = useNavigate()

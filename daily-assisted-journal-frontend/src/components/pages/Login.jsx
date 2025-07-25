@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import ButtonGlass from '../ui/ButtonGlass'
+import ButtonGlass from '../ui/ButtonGlass.jsx'
 import {
   auth, signInWithEmailAndPassword,
   GoogleAuthProvider, providerGoogle, signInWithRedirect, getRedirectResult,

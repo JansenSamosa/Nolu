@@ -39,12 +39,12 @@ const AnimatedCarousel = ({ position=0, classNameContainer = '', classNameConten
       <AnimatePresence mode='sync' custom={direction}>
         <motion.div
           key={position}
-          className={`${classNameContent} absolute`}
+          className={`${classNameContent} absolute `}
           variants={slideVariants}
           initial='enter'
           animate='center'
           exit='exit'
-          transition={{ duration: 0.5, type:'spring' }}
+          transition={{ duration: 0.5, ease: 'backOut'}}
           custom={direction}
         >
           {children}

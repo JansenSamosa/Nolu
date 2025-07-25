@@ -47,3 +47,7 @@
 @utility bg-glass {
   @apply shadow bg-white/10 rounded-2xl 
 }
+
+@utility bg-glass-frost {
+  @apply border border-white/40 bg-white/5 rounded-md
+}

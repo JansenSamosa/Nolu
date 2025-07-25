@@ -3,56 +3,54 @@
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../App'
+import { generateSampleEntries } from '../utils/generateSampleData'
+import { getLocalISOString } from '../utils/utils'
 
 const baseURL = 'http://127.0.0.1:5000/entries'
 
 export const useFetchEntriesWithCache = () => {
   const user = useContext(AuthContext)
 
-  const [entries, setEntries] = useState([])
-  const [from, setFrom] = useState(() => {
-    // set initial from date to be a week ago
-    const date = new Date()
-    date.setDate(date.getDate() - 7)
-    return new Date(date)
-  })
-  const [to, setTo] = useState(new Date())
-
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null);
 
-  const endpoint = () => {
-    const start = from.toISOString().split('T')[0]
-    const end = to.toISOString().split('T')[0]
-    const url = `${baseURL}?start=${start}&end=${end}`
-    return url
-  }
+  const fetchEntries = async (from, to) => {
+    const endpoint = () => {
+      const start = from.toLocaleDateString('en-CA') // Returns YYYY-MM-DD format
+      const end = to.toLocaleDateString('en-CA')
+      const url = `${baseURL}?start=${start}&end=${end}`
 
-  const fetchEntries = async () => {
+      return url
+    }
+
+    setLoading(true);
+    let entries = []
+
     try {
-      setLoading(true);
       const response = await axios.get(endpoint(), {
         headers: {
           'Authorization': `Bearer ${await user.getIdToken()}`
         }
       });
-      setEntries(response.data.entries);
+      entries = response.data.entries
     } catch (err) {
-      setError(err.message);
+      entries = null
+      console.log(err.message)
     } finally {
       setLoading(false);
     }
+
+    // DEV: Return sample entries if none exist
+    if (!entries || entries.length === 0) {
+      console.log('No entries found, returning sample data for the requested date...')
+      const sampleEntries = generateSampleEntries(from)
+      console.log(`Generated ${sampleEntries.length} sample entries for ${from.toDateString()}`)
+      return sampleEntries
+    }
+
+    return entries
   }
 
-  useEffect(() => {
-    fetchEntries()
-  }, [])
-
-  useEffect(() => {
-    fetchEntries()
-  }, [from, to])
-
-  return { entries, loading, error }
+  return { fetchEntries }
 }
 
 export const useSaveEntries = () => {
