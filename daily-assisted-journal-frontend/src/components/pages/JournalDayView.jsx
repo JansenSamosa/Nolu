@@ -40,12 +40,14 @@ const JournalDayView = ({ dayOffset, adjustDayOffset, entries }) => {
   const { streakData, setStreakData } = useContext(StreakContext)
 
   const date = calculateDateWithOffset(dayOffset)
+  
+  const allowScrollToNextDay = !(dayOffset === 1 || (dayOffset === 0 && entries.length === 0))
 
   return (
     <div className=' w-full h-full flex flex-col text-2xl'>
-      <div className=' w-full flex items-center justify-between h-30  font-bold bg-glass '>
+      <div className=' w-full flex items-center justify-between h-25  font-bold bg-glass-frost'>
         <button
-          className='size-15 p-2.5 cursor-pointer hover:size-16 transition-all'
+          className='h-full w-10 cursor-pointer transition-all bg-glass rounded-md rounded-r-none'
           onClick={() => adjustDayOffset(-1)}
         >
           <ChevronLeftIcon />
@@ -54,12 +56,12 @@ const JournalDayView = ({ dayOffset, adjustDayOffset, entries }) => {
           <h1 className='text-4xl'>{getDayOfWeek(date)}</h1>
           <h1 className='font-normal text-2xl'>{formatDateString(date)} 2025</h1>
         </div>
-        <button
-          className='size-15 p-2.5 cursor-pointer hover:size-16 transition-all'
+        {allowScrollToNextDay && <button
+          className='h-full w-10 cursor-pointer transition-all bg-glass rounded-md rounded-l-none'
           onClick={() => adjustDayOffset(1)}
         >
           <ChevronRightIcon />
-        </button>
+        </button>}
       </div>
       <motion.div
         className='w-full flex-1 text-2xl overflow-scroll'
@@ -90,14 +92,33 @@ const JournalDayView = ({ dayOffset, adjustDayOffset, entries }) => {
 
         {/* no entries and dayOffset == 0 */}
         {entries.length === 0 && dayOffset === 0 && (
-          <div className='flex flex-col justify-center items-center gap-5 h-full'>
-            <p>{streakData.streak}</p>
-            <ButtonGlass className='p-5 ' onClick={() => navigate('/daily')}> 
+          <div className='flex flex-col justify-center items-center gap-5 h-full mx-10 text-center'>
+            <div className='p-2.5 w-full'>
+              <p>
+                Current Streak: {`${streakData.streak} ${streakData.streak == 1 ? 'day' : 'days'}`}
+              </p>
+              <p className='text-xl mt-2 '>
+                Complete a daily reflection everyday to increase this!
+              </p>
+            </div>
+            <ButtonGlass className='px-10 py-2.5 ' onClick={() => navigate('/daily')}>
               Start Daily Reflection
             </ButtonGlass>
           </div>
         )}
         {/* dayOffst == 1 */}
+        {dayOffset == 1 && (
+          <div className='flex flex-col justify-center items-center h-full text-center'>
+            <div>
+              <p>
+                Current Streak: {`${streakData.streak} ${streakData.streak == 1 ? 'day' : 'days'}`}
+              </p>
+              <p className='text-xl mt-2'>
+                Come back tomorrow to increase your streak! 
+              </p>
+            </div>
+          </div>
+        )}
       </motion.div>
     </div>
   )

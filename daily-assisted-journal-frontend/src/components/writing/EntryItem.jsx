@@ -75,13 +75,14 @@ const EntryItem = ({ entry, index }) => {
         >
           <motion.p
             layout
-            className="font-bold"
+            className="font-bold text-center w-full"
           >
             {headerText}
 
           </motion.p>
           {viewResponse &&
             <motion.p
+              className='text-left'
               layout
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

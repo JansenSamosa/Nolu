@@ -11,6 +11,8 @@ import axios from 'axios'
 import Test from './components/pages/Test.jsx'
 import { useSaveEntries } from './api_handles/entriesHandler.jsx'
 import { saveSampleEntries } from './utils/generateSampleData.js'
+import Account from './components/pages/Account.jsx'
+import Settings from './components/pages/Settings.jsx'
 
 export const AuthContext = createContext()
 export const StaticDataContext = createContext()
@@ -27,9 +29,9 @@ const useUserData = () => {
     lastStreakDate: null
   })
 
-  useEffect(() => {
-    console.log(streakData)
-  }, [streakData])
+  // useEffect(() => {
+  //   console.log(streakData)
+  // }, [streakData])
 
   return { user, staticData, streakData, setUser, setStaticData, setStreakData }
 }
@@ -94,6 +96,8 @@ const App = () => {
                   <Route path='/register' element={<Register />} />
                   <Route path='/daily' element={<Daily />} />
                   <Route path='/journal' element={<Journal />} />
+                  <Route path='/account' element={<Account />} />
+                  <Route path='/settings' element={<Settings />} />
                   <Route path='/test' element={<Test />} />
                 </Routes>
               </BrowserRouter>

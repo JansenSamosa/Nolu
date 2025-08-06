@@ -94,7 +94,7 @@ const DailyReview = ({ entries }) => {
         </LayoutGroup>
       </div>
       <motion.div
-        className='w-full'
+        className='w-full flex'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 4, ease: 'backInOut' }}
@@ -103,8 +103,10 @@ const DailyReview = ({ entries }) => {
           className='w-full p-3 h-15 flex justify-center rounded-none '
           onClick={() => {navigate('/journal')}}
         >
-          Return to Journal
-          <BookOpenIcon className='ml-3' />
+          <p>
+            Return to Journal
+          </p>
+          <BookOpenIcon className='ml-3 h-full' />
         </ButtonGlass>
       </motion.div>
     </div>

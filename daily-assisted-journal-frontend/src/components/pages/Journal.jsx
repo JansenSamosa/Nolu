@@ -35,12 +35,10 @@ const Journal = () => {
 
   useEffect(() => {
     adjustDayOffset(0)
-    console.log(getLocalISOString())
-  }, [])
 
-  useEffect(() => {
-    console.log(visibleEntries)
-  }, [visibleEntries])
+    // pre-fetch entries for caching purposes
+    fetchEntries(calculateDateWithOffset(dayOffset - 10), calculateDateWithOffset(1))
+  }, [])
 
   return !loading && (
     <div className='background-saturated w-screen h-screen
@@ -57,20 +55,6 @@ const Journal = () => {
             <JournalDayView dayOffset={dayOffset} adjustDayOffset={adjustDayOffset} entries={visibleEntries} />
           }
         </AnimatedCarousel>
-      </div>
-      <div className='w-full h-15 p-4 bg-glass items-center rounded-none flex '>
-        {/* <button
-          className='size-15 p-2.5 cursor-pointer hover:size-16 transition-all'
-          onClick={() => adjustDayOffset(-1)}
-        >
-          <ChevronLeftIcon />
-        </button>
-        <button
-          className='size-15 p-2.5 cursor-pointer hover:size-16 transition-all'
-          onClick={() => adjustDayOffset(1)}
-        >
-          <ChevronRightIcon />
-        </button> */}
       </div>
     </div>
   )
