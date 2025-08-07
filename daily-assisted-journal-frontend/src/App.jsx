@@ -49,7 +49,7 @@ const App = () => {
   const [loading, setLoading] = useState(true)
 
   const fetchUserData = async (user) => {
-    const response = await axios.get('http://127.0.0.1:5001/dashboard', {
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/dashboard`, {
       headers: {
         Authorization: `Bearer ${await user.getIdToken()}`
       }

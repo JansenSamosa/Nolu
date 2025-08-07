@@ -6,7 +6,7 @@ import { AuthContext } from '../App'
 import { generateSampleEntries } from '../utils/generateSampleData'
 import { getLocalISOString } from '../utils/utils'
 
-const baseURL = 'http://127.0.0.1:5001/entries'
+const baseURL = `${import.meta.env.VITE_API_BASE_URL}/entries`
 
 // key: dateString in en-CA format
 // value: {

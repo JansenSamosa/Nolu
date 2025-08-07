@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { AuthContext, StreakContext } from '../App'
 import axios from 'axios'
 
-const baseURL = 'http://127.0.0.1:5001/streak'
+const baseURL = `${import.meta.env.VITE_API_BASE_URL}/streak`
 
 export const useUpdateStreak = () => {
   const user = useContext(AuthContext)
