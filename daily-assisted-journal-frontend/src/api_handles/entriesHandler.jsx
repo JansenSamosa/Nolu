@@ -6,7 +6,7 @@ import { AuthContext } from '../App'
 import { generateSampleEntries } from '../utils/generateSampleData'
 import { getLocalISOString } from '../utils/utils'
 
-const baseURL = 'http://127.0.0.1:5000/entries'
+const baseURL = 'http://127.0.0.1:5001/entries'
 
 // key: dateString in en-CA format
 // value: {

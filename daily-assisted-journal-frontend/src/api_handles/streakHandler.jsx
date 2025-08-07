@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { AuthContext, StreakContext } from '../App'
 import axios from 'axios'
 
-const baseURL = 'http://127.0.0.1:5000/streak'
+const baseURL = 'http://127.0.0.1:5001/streak'
 
 export const useUpdateStreak = () => {
   const user = useContext(AuthContext)
