@@ -123,7 +123,8 @@ def create_app(app_config=None):
         app.config.update(app_config)
     else:
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
-
+    
+    print(repr(app.config["SQLALCHEMY_DATABASE_URI"]))
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
@@ -424,10 +425,10 @@ if __name__ == "__main__":
     app = create_app()
 
     with app.app_context():
-        db.drop_all()  # Drop all tables for TESTING
+        # db.drop_all()  # Drop all tables for TESTING
         db.create_all()
         seed_initial_data(db)
 
-    app.run(debug=True, port=5000)
+    app.run(debug=False, host="0.0.0.0", port=5000)
 
     # add some sample entries for testing purposes with backend
