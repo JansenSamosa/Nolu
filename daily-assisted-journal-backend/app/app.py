@@ -115,7 +115,17 @@ def create_app(app_config=None):
     load_dotenv()
 
     app = Flask(__name__)
-    CORS(app)
+
+    allowed = [o.strip() for o in os.getenv(
+        "ALLOWED_ORIGINS"
+    ).split(",") if o.strip()]
+    print(allowed)
+    CORS(
+        app,
+        resources={r"/*": {"origins": allowed}},
+        allow_headers=["Content-Type","Authorization"],
+        methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
+    )
 
     DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///:memory:")
 
