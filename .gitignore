@@ -1,3 +1,32 @@
+# Logs
+daily-assisted-journal-frontend/logs
+daily-assisted-journal-frontend/*.log
+daily-assisted-journal-frontend/npm-debug.log*
+daily-assisted-journal-frontend/yarn-debug.log*
+daily-assisted-journal-frontend/yarn-error.log*
+daily-assisted-journal-frontend/pnpm-debug.log*
+daily-assisted-journal-frontend/lerna-debug.log*
+
+daily-assisted-journal-frontend/node_modules
+daily-assisted-journal-frontend/dist
+daily-assisted-journal-frontend/dist-ssr
+daily-assisted-journal-frontend/*.local
+daily-assisted-journal-frontend/.env
+
+# Editor directories and files
+daily-assisted-journal-frontend/.vscode/*
+daily-assisted-journal-frontend/!.vscode/extensions.json
+daily-assisted-journal-frontend/.idea
+daily-assisted-journal-frontend/.DS_Store
+daily-assisted-journal-frontend/*.suo
+daily-assisted-journal-frontend/*.ntvs*
+daily-assisted-journal-frontend/*.njsproj
+daily-assisted-journal-frontend/*.sln
+daily-assisted-journal-frontend/*.sw?
+Daily-assisted-journal-frontend/deploy.sh
+
+
+
 daily-assisted-journal-backend/venv
 daily-assisted-journal-backend/.pytest_cache/
 daily-assisted-journal-backend/__pycache__/
