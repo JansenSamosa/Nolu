@@ -26,7 +26,12 @@ const Header = () => {
          h-15
          '
     >
-      <h1 className='text-4xl font-bold text-color-main-title text-shadow-md'> Nolu </h1>
+      <button 
+        onClick={() => navigate('/')}
+        className='cursor-pointer text-4xl font-bold text-color-main-title text-shadow-md'
+      > 
+        Nolu 
+      </button>
       <nav className="flex items-center space-x-4">
         <NavButton path='/'>
           <HomeIcon />
